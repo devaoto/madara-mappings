@@ -1,0 +1,23 @@
+{
+  "name": "madara-mappings",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/string-similarity": "^4.0.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@consumet/extensions": "https://github.com/consumet/consumet.ts",
+    "chalk": "^5.3.0",
+    "cheerio": "^1.0.0-rc.12",
+    "fastest-levenshtein": "^1.0.16",
+    "hono": "^4.4.9",
+    "ky": "^1.4.0",
+    "mongoose": "^8.4.4",
+    "string-similarity": "^4.0.4",
+    "zod": "^3.23.8"
+  }
+}
