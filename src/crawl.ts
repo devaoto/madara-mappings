@@ -96,7 +96,10 @@ const getMapping = async () => {
 
 const clearDb = async () => {
   await connect();
+  const totalAnimes = Anime.countDocuments({});
   await Anime.deleteMany({});
+
+  console.log("Deleted", totalAnimes);
 
   mongoose.connection.close();
 };

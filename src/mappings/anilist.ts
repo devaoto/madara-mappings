@@ -316,6 +316,43 @@ export const getTitle = async (id: number) => {
       seasonYear
       id
       idMal
+            countryOfOrigin
+            description
+            duration
+            episodes
+            endDate {
+              year
+              month
+              day
+            }
+            genres
+            isAdult
+            startDate {
+              year
+              month
+              day
+            }
+            synonyms
+            trailer {
+              id
+              site
+              thumbnail
+            }
+            status
+            studios {
+              edges {
+                isMain
+                id
+                node {
+                  favourites
+                  id
+                  isAnimationStudio
+                  isFavourite
+                  name
+                  siteUrl
+                }
+              }
+            }
           }
         }
       `,
