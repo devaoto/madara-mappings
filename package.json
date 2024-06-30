@@ -18,6 +18,7 @@
     "hono": "^4.4.9",
     "ky": "^1.4.0",
     "mongoose": "^8.4.4",
+    "node-cache": "^5.1.2",
     "node-cron": "^3.0.3",
     "string-similarity": "^4.0.4",
     "zod": "^3.23.8"

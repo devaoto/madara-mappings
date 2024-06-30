@@ -57,3 +57,25 @@ export const getMappings = async (id: string) => {
     },
   };
 };
+
+export const getLTMMappings = async (
+  id: string,
+  malId: string,
+  format = "TV",
+  seasonYear: number = new Date().getFullYear()
+) => {
+  const fribbList = await getFribbList(Number(malId)!);
+
+  const [fribb, thetvdb] = await Promise.all([
+    getFribbList(Number(malId!)),
+    getTVDB(String(fribbList?.thetvdb_id), String(seasonYear), format),
+  ]);
+
+  return {
+    mappings: {
+      anilistId: id,
+      fribb: fribb || {},
+      thetvdb: thetvdb || {},
+    },
+  };
+};

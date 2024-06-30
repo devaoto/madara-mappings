@@ -5,6 +5,7 @@ import connect from "./db/db";
 import Anime from "./db/schema/mappingSchema";
 import fs from "fs/promises";
 import chalk from "chalk";
+import { TrendingMedia } from "./db/schema/trendingSchema";
 
 const LAST_ID_FILE = "lastId.txt";
 
@@ -96,10 +97,12 @@ const getMapping = async () => {
 
 const clearDb = async () => {
   await connect();
-  const totalAnimes = Anime.countDocuments({});
+  const totalAnimes = await Anime.find({});
+  const totalTrendingAnimes = await TrendingMedia.find({});
   await Anime.deleteMany({});
+  await TrendingMedia.deleteMany({});
 
-  console.log("Deleted", totalAnimes);
+  console.log("Deleted", totalAnimes.length + totalTrendingAnimes.length);
 
   mongoose.connection.close();
 };

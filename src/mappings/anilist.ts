@@ -1,4 +1,9 @@
 import { request } from "./request";
+import NodeCache from "node-cache";
+
+const cache = new NodeCache({
+  stdTTL: 3600,
+});
 
 export interface QueryResponse {
   Media: Media;
@@ -286,6 +291,13 @@ export const search = async (query: string) => {
 };
 
 export const getTitle = async (id: number) => {
+  const cacheKey = `getTitle:${id}`;
+
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return JSON.parse(JSON.stringify(cachedData));
+  }
+
   const response = await request(`https://graphql.anilist.co`, {
     method: "POST",
     headers: {
@@ -364,8 +376,12 @@ export const getTitle = async (id: number) => {
 
   const data = (await response?.json()) as { data: QueryResponse };
 
-  return {
+  const parsedData = {
     ...data.data.Media,
     color: data.data.Media.coverImage?.color || null,
   };
+
+  await cache.set(cacheKey, JSON.stringify(parsedData));
+
+  return parsedData;
 };
