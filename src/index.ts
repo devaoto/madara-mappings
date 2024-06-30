@@ -5,6 +5,7 @@ import Anime from "./db/schema/mappingSchema";
 import { prettyJSON } from "hono/pretty-json";
 import { cors } from "hono/cors";
 import chalk from "chalk";
+import cron from "node-cron";
 
 await connect();
 const app = new Hono();
@@ -45,6 +46,21 @@ app.get("/anime/:id", async (c) => {
     return c.json(mappings);
   } catch (error) {
     console.log(error);
+  }
+});
+
+cron.schedule("0 */5 * * *", async () => {
+  try {
+    console.log(chalk.blue("Running cron job to update anime mappings..."));
+    const animes = await Anime.find({ status: { $ne: "FINISHED" } });
+    for (const anime of animes) {
+      const id = anime.id;
+      const newMappings = await getMappings(id);
+      await Anime.updateOne({ id: id }, newMappings ?? {});
+      console.log(chalk.green(`Updated mappings for anime ID: ${id}`));
+    }
+  } catch (error) {
+    console.error(chalk.red("Error running cron job:", error));
   }
 });
 

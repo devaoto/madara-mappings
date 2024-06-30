@@ -4,6 +4,7 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/node-cron": "^3.0.11",
     "@types/string-similarity": "^4.0.2"
   },
   "peerDependencies": {
@@ -17,6 +18,7 @@
     "hono": "^4.4.9",
     "ky": "^1.4.0",
     "mongoose": "^8.4.4",
+    "node-cron": "^3.0.3",
     "string-similarity": "^4.0.4",
     "zod": "^3.23.8"
   }
