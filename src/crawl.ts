@@ -6,6 +6,7 @@ import Anime from "./db/schema/mappingSchema";
 import fs from "fs/promises";
 import chalk from "chalk";
 import { TrendingMedia } from "./db/schema/trendingSchema";
+import { PopularMedia } from "./db/schema/popularSchema";
 
 const LAST_ID_FILE = "lastId.txt";
 
@@ -102,7 +103,16 @@ const clearDb = async () => {
   await Anime.deleteMany({});
   await TrendingMedia.deleteMany({});
 
-  console.log("Deleted", totalAnimes.length + totalTrendingAnimes.length);
+  const totalPopularANimes = await PopularMedia.find({});
+
+  await PopularMedia.deleteMany({});
+
+  // console.log("Deleted", totalPopularANimes.length);
+
+  console.log(
+    "Deleted",
+    totalAnimes.length + totalTrendingAnimes.length + totalPopularANimes.length
+  );
 
   mongoose.connection.close();
 };

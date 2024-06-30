@@ -97,11 +97,14 @@ interface Trailer extends Document {
   thumbnail: string;
 }
 
-const TrailerSchema: Schema = new Schema({
-  id: { type: String, default: "" },
-  site: { type: String, default: "" },
-  thumbnail: { type: String, default: "" },
-});
+const MappingsSchema: Schema = new Schema(
+  {
+    anilistId: { type: String, default: "" },
+    fribb: { type: Schema.Types.Mixed, default: {} },
+    thetvdb: { type: Map, of: Schema.Types.Mixed, default: {} },
+  },
+  { _id: false }
+);
 
 const StudioNodeSchema: Schema = new Schema({
   id: { type: Number, default: 0 },
@@ -136,15 +139,6 @@ const NextAiringEpisodeSchema: Schema = new Schema({
   mediaId: { type: Number, default: 0 },
 });
 
-const MappingsSchema: Schema = new Schema(
-  {
-    anilistId: { type: String, default: "" },
-    fribb: { type: Schema.Types.Mixed, default: {} },
-    thetvdb: { type: Map, of: Schema.Types.Mixed, default: {} },
-  },
-  { _id: false }
-);
-
 const MediaSchema: Schema = new Schema({
   bannerImage: { type: String, default: "" },
   averageScore: { type: Number, default: 0 },
@@ -175,6 +169,6 @@ const MediaSchema: Schema = new Schema({
   mappings: { type: MappingsSchema, default: () => ({}) },
 });
 
-const Media = mongoose.model<Media>("Media", MediaSchema);
+const Media = mongoose.model<Media>("MediaPopularAllTime", MediaSchema);
 
-export { Media as TrendingMedia, MediaSchema as TrendingMediaSchema };
+export { Media as PopularMedia, MediaSchema as PopularMediaSchema };

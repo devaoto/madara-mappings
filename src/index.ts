@@ -8,6 +8,8 @@ import chalk from "chalk";
 import cron from "node-cron";
 import { getTrending } from "./providers/trending";
 import { TrendingMedia } from "./db/schema/trendingSchema";
+import { PopularMedia } from "./db/schema/popularSchema";
+import { getPopular } from "./providers/popular";
 
 await connect();
 const app = new Hono();
@@ -58,33 +60,46 @@ app.get("/trending", async (c) => {
   return c.json(await getTrending(page, limit));
 });
 
+app.get("/popular", async (c) => {
+  const page = Number(c.req.query("page")) || 1;
+  const limit = Number(c.req.query("limit")) || 50;
+
+  return c.json(await getPopular(page, limit));
+});
+
 cron.schedule("0 */5 * * *", async () => {
   try {
     console.log(chalk.blue("Running cron job to update anime mappings..."));
-    const animes = await Anime.find({ status: { $ne: "FINISHED" } });
-    for (const anime of animes) {
-      const id = anime.id;
-      const newMappings = await getMappings(id);
-      await Anime.updateOne({ id: id }, newMappings ?? {});
-      console.log(chalk.green(`Updated mappings for anime ID: ${id}`));
-    }
-    const trending = await TrendingMedia.find({ status: { $ne: "FINISHED" } });
-    for (const anime of trending) {
-      const id = anime.id;
-      const newMappings = await getLTMMappings(
-        id,
-        String(anime.idMal),
-        anime.format,
-        anime.seasonYear
-      );
-      await TrendingMedia.updateOne({ id: id }, newMappings ?? {});
-      console.log(chalk.green(`Updated mappings for anime ID: ${id}`));
-    }
+
+    const updateMappings = async (
+      model: any,
+      getMappingsFunc: any,
+      logPrefix: string
+    ) => {
+      const items = await model.find({ status: { $ne: "FINISHED" } });
+      const updatePromises = items.map(async (item: any) => {
+        const id = item.id;
+        const newMappings = await getMappingsFunc(
+          id,
+          String(item.idMal),
+          item.format,
+          item.seasonYear
+        );
+        await model.updateOne({ id: id }, newMappings ?? {});
+        console.log(chalk.green(`Updated mappings for ${logPrefix} ID: ${id}`));
+      });
+      await Promise.all(updatePromises);
+    };
+
+    await Promise.all([
+      updateMappings(Anime, getMappings, "anime"),
+      updateMappings(TrendingMedia, getLTMMappings, "trending anime"),
+      updateMappings(PopularMedia, getLTMMappings, "popular anime"),
+    ]);
   } catch (error) {
     console.error(chalk.red("Error running cron job:", error));
   }
 });
-
 export default {
   port: 3000,
   fetch: app.fetch,

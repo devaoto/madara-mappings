@@ -1,6 +1,6 @@
 import ky from "ky";
 import { getLTMMappings } from "../getMappings";
-import { TrendingMedia } from "../db/schema/trendingSchema";
+import { PopularMedia } from "../db/schema/popularSchema";
 
 const getAnilistTrending = async (page: number, limit: number) => {
   const query = `query Query($page: Int, $perPage: Int, $sort: [MediaSort]) {
@@ -82,7 +82,7 @@ const getAnilistTrending = async (page: number, limit: number) => {
       variables: {
         page,
         perPage: limit,
-        sort: ["TRENDING_DESC", "POPULARITY_DESC"],
+        sort: ["POPULARITY_DESC", "SCORE_DESC"],
       },
     },
   });
@@ -112,14 +112,12 @@ const updateDatabase = async (mediaList: any) => {
 
       console.log(trailer);
 
-      let mappings = (
-        await getLTMMappings(
-          String(media.id),
-          media.idMal,
-          media.format,
-          media.seasonYear
-        )
-      ).mappings;
+      let mappings = await getLTMMappings(
+        String(media.id),
+        media.idMal,
+        media.format,
+        media.seasonYear
+      );
 
       return {
         updateOne: {
@@ -158,17 +156,17 @@ const updateDatabase = async (mediaList: any) => {
     })
   );
 
-  await TrendingMedia.bulkWrite(bulkOps);
+  await PopularMedia.bulkWrite(bulkOps);
 };
 
-export const getTrending = async (page: number = 1, limit: number = 50) => {
-  const totalRecords = await TrendingMedia.countDocuments({
+export const getPopular = async (page: number = 1, limit: number = 50) => {
+  const totalRecords = await PopularMedia.countDocuments({
     genres: { $ne: [] },
   });
   const totalPages = Math.ceil(totalRecords / limit);
 
   if (page <= totalPages) {
-    const trending = await TrendingMedia.find({ genres: { $ne: [] } })
+    const trending = await PopularMedia.find({ genres: { $ne: [] } })
       .limit(limit)
       .skip((page - 1) * limit);
 
@@ -194,7 +192,7 @@ export const getTrending = async (page: number = 1, limit: number = 50) => {
     console.log("No trending media found.");
   }
 
-  const trending = await TrendingMedia.find({ genres: { $ne: [] } })
+  const trending = await PopularMedia.find({ genres: { $ne: [] } })
     .limit(limit)
     .skip((page - 1) * limit);
 
