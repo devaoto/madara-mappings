@@ -14,6 +14,12 @@ interface ITitle {
   userPreferred?: string;
 }
 
+interface IDate {
+  year?: number;
+  month?: number;
+  day?: number;
+}
+
 interface IEpisodeTitle {
   ja?: string;
   en?: string;
@@ -40,6 +46,25 @@ interface IEpisode {
   summary?: string;
 }
 
+interface Studios {
+  edges: Edge[];
+}
+
+interface Edge {
+  isMain: boolean;
+  id: number;
+  node: Node;
+}
+
+interface Node {
+  favourites: number;
+  id: number;
+  isAnimationStudio: boolean;
+  isFavourite: boolean;
+  name: string;
+  siteUrl: string;
+}
+
 interface IAnizip {
   titles?: Record<string, string>;
   episodes?: Record<string, IEpisode>;
@@ -61,6 +86,12 @@ interface IMappings {
   zoro?: Record<string, any>;
 }
 
+interface Trailer {
+  id: string;
+  site: string;
+  thumbnail: string;
+}
+
 interface IAnime extends Document {
   bannerImage?: string;
   averageScore?: number;
@@ -68,6 +99,17 @@ interface IAnime extends Document {
   title?: ITitle;
   format?: string;
   type?: string;
+  description?: string;
+  countryOfOrigin?: string;
+  duration?: number;
+  episodes?: number;
+  genres?: string[];
+  status?: string;
+  startDate?: IDate;
+  endDate?: IDate;
+  synonyms?: string[];
+  isAdult?: boolean;
+  studios: Studios;
   season?: string;
   seasonYear?: number;
   id?: number;
@@ -75,6 +117,43 @@ interface IAnime extends Document {
   color?: string;
   mappings?: IMappings;
 }
+
+const TrailerSchema: Schema = new Schema(
+  {
+    id: { type: String, required: true },
+    site: { type: String, required: true },
+    thumbnail: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const NodeSchema: Schema = new Schema(
+  {
+    favourites: { type: Number, required: true },
+    id: { type: Number, required: true },
+    isAnimationStudio: { type: Boolean, required: true },
+    isFavourite: { type: Boolean, required: true },
+    name: { type: String, required: true },
+    siteUrl: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const EdgeSchema: Schema = new Schema(
+  {
+    isMain: { type: Boolean, required: true },
+    id: { type: Number, required: true },
+    node: { type: NodeSchema, required: true },
+  },
+  { _id: false }
+);
+
+const StudiosSchema: Schema = new Schema(
+  {
+    edges: { type: [EdgeSchema], required: true },
+  },
+  { _id: false }
+);
 
 const ImageSchema: Schema = new Schema(
   {
@@ -128,6 +207,18 @@ const EpisodeSchema: Schema = new Schema(
   { _id: false }
 );
 
+const StartDateSchema: Schema = new Schema({
+  year: { type: Number, default: null },
+  month: { type: Number, default: null },
+  day: { type: Number, default: null },
+});
+
+const EndDateSchema: Schema = new Schema({
+  year: { type: Number, default: null },
+  month: { type: Number, default: null },
+  day: { type: Number, default: null },
+});
+
 const AnizipSchema: Schema = new Schema(
   {
     titles: { type: Map, of: String, default: {} },
@@ -170,6 +261,17 @@ const AnimeSchema: Schema = new Schema({
   id: { type: Number, default: null },
   idMal: { type: Number, default: null },
   color: { type: String, default: "" },
+  status: { type: String, default: "" },
+  episodes: { type: Number, default: null },
+  duration: { type: Number, default: null },
+  description: { type: String, default: "" },
+  studios: { type: StudiosSchema, default: {} },
+  trailer: { type: TrailerSchema, default: [] },
+  startDate: { type: StartDateSchema, default: {} },
+  endDate: { type: EndDateSchema, default: {} },
+  synonyms: { type: [String], default: [] },
+  countryOfOrigin: { type: String, default: "" },
+  isAdult: { type: Boolean, default: false },
   mappings: { type: MappingsSchema, default: {} },
 });
 
