@@ -84,7 +84,7 @@ interface IMappings {
   thetvdb?: Record<string, any>;
   tmdb?: Record<string, any>;
   zoro?: Record<string, any>;
-  anify: Record<string, any>;
+  anify?: Record<string, any>;
 }
 
 interface Trailer {

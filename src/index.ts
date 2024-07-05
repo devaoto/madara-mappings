@@ -73,7 +73,9 @@ app.get("/anify/:id", async (c) => {
 app.get("/anime/:id", async (c) => {
   try {
     const id = c.req.param("id");
+    const requestedMappings = c.req.query("mappings")?.split(",") || [];
     let mappings = await Anime.findOne({ id: id });
+    console.log(requestedMappings);
 
     if (!mappings) {
       console.log(chalk.yellow(`Anime mapping not found for ID: ${id}`));
@@ -85,13 +87,30 @@ app.get("/anime/:id", async (c) => {
       await m.save();
 
       console.log(chalk.greenBright("Saved mapping for:", id));
-
-      return c.json(m);
+      mappings = m;
     }
 
-    return c.json(mappings);
+    const response = {
+      // @ts-ignore
+      ...mappings._doc,
+      mappings: {},
+    };
+
+    if (requestedMappings.length > 0) {
+      requestedMappings.forEach((mapping) => {
+        if (mappings.mappings?.[mapping as keyof typeof mappings.mappings]) {
+          response.mappings[mapping] =
+            mappings.mappings[mapping as keyof typeof mappings.mappings];
+        }
+      });
+    } else {
+      response.mappings = mappings.mappings;
+    }
+
+    return c.json(response);
   } catch (error) {
     console.log(error);
+    return c.json({ error: "An error occurred" }, 500);
   }
 });
 

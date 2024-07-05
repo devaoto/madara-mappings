@@ -100,12 +100,13 @@ const clearDb = async () => {
   await connect();
   const totalAnimes = await Anime.find({});
   const totalTrendingAnimes = await TrendingMedia.find({});
-  await Anime.deleteMany({});
-  await TrendingMedia.deleteMany({});
-
   const totalPopularANimes = await PopularMedia.find({});
 
-  await PopularMedia.deleteMany({});
+  await Promise.all([
+    Anime.deleteMany({}),
+    TrendingMedia.deleteMany({}),
+    PopularMedia.deleteMany({}),
+  ]);
 
   // console.log("Deleted", totalPopularANimes.length);
 
