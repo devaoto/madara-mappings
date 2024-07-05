@@ -74,9 +74,10 @@ cron.schedule("0 */5 * * *", async () => {
     const updateMappings = async (
       model: any,
       getMappingsFunc: any,
-      logPrefix: string
+      logPrefix: string,
+      condition: any = {}
     ) => {
-      const items = await model.find({ status: { $ne: "FINISHED" } });
+      const items = await model.find(condition);
       const updatePromises = items.map(async (item: any) => {
         const id = item.id;
         const newMappings = await getMappingsFunc(
@@ -92,7 +93,9 @@ cron.schedule("0 */5 * * *", async () => {
     };
 
     await Promise.all([
-      updateMappings(Anime, getMappings, "anime"),
+      updateMappings(Anime, getMappings, "anime", {
+        status: { $ne: "FINISHED" },
+      }),
       updateMappings(TrendingMedia, getLTMMappings, "trending anime"),
       updateMappings(PopularMedia, getLTMMappings, "popular anime"),
     ]);
@@ -100,6 +103,7 @@ cron.schedule("0 */5 * * *", async () => {
     console.error(chalk.red("Error running cron job:", error));
   }
 });
+
 export default {
   port: 3000,
   fetch: app.fetch,
