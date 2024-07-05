@@ -7,6 +7,7 @@ import {
   getFribbList,
   getKitsu,
 } from "./mappings";
+import { getAnify } from "./mappings/anify";
 import { getAniZip } from "./mappings/anizip";
 import { getTVDB } from "./mappings/thetvdb";
 
@@ -27,7 +28,7 @@ export const getMappings = async (id: string) => {
 
   const fribbList = await getFribbList(malId!);
 
-  const [malSync, gogoanime, zoro, kitsu, thetvdb, tmdb, anizip] =
+  const [malSync, gogoanime, zoro, kitsu, thetvdb, tmdb, anizip, anify] =
     await Promise.all([
       getMalSync(anilistInfo.id!),
       getGogoAnime(primaryTitle!),
@@ -40,6 +41,7 @@ export const getMappings = async (id: string) => {
       ),
       getTMDB(fribbList?.thetvdb_id, anilistInfo.format!),
       getAniZip(id),
+      getAnify(id),
     ]);
 
   return {
@@ -54,6 +56,7 @@ export const getMappings = async (id: string) => {
       thetvdb: thetvdb || {},
       tmdb: tmdb || {},
       zoro: zoro || {},
+      anify: anify,
     },
   };
 };

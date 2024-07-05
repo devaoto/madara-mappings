@@ -245,6 +245,7 @@ const MappingsSchema: Schema = new Schema(
     thetvdb: { type: Map, of: Schema.Types.Mixed, default: {} },
     tmdb: { type: Map, of: Schema.Types.Mixed, default: {} },
     zoro: { type: Map, of: Schema.Types.Mixed, default: {} },
+    anify: { type: Schema.Types.Mixed, default: {} },
   },
   { _id: false }
 );
