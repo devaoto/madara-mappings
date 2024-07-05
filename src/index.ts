@@ -28,6 +28,48 @@ app.get("/anime/delete/:id", async (c) => {
   } catch (error) {}
 });
 
+app.get("/malSync/:id", async (c) => {
+  const id = c.req.param("id");
+  let mappings = await Anime.findOne({ id: id });
+
+  if (!mappings) {
+    console.log(chalk.yellow(`Anime mapping not found for ID: ${id}`));
+    console.log(chalk.cyan("Saving new mapping for: ", id));
+    const m = new Anime({
+      ...(await getMappings(id)),
+    });
+
+    await m.save();
+
+    console.log(chalk.greenBright("Saved mapping for:", id));
+
+    return c.json(m.mappings?.malSync);
+  }
+
+  return c.json(mappings.mappings?.malSync);
+});
+
+app.get("/anify/:id", async (c) => {
+  const id = c.req.param("id");
+  let mappings = await Anime.findOne({ id: id });
+
+  if (!mappings) {
+    console.log(chalk.yellow(`Anime mapping not found for ID: ${id}`));
+    console.log(chalk.cyan("Saving new mapping for: ", id));
+    const m = new Anime({
+      ...(await getMappings(id)),
+    });
+
+    await m.save();
+
+    console.log(chalk.greenBright("Saved mapping for:", id));
+
+    return c.json(m.mappings?.anify);
+  }
+
+  return c.json(mappings.mappings?.anify);
+});
+
 app.get("/anime/:id", async (c) => {
   try {
     const id = c.req.param("id");
