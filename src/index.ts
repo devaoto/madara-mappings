@@ -132,33 +132,31 @@ cron.schedule("0 */5 * * *", async () => {
   try {
     console.log(chalk.blue("Running cron job to update anime mappings..."));
 
-    const updateMappings = async (
+    const updateTrendingAndPopular = async (
       model: any,
       getMappingsFunc: any,
-      logPrefix: string,
-      condition: any = {}
+      logPrefix: string
     ) => {
-      const items = await model.find(condition);
-      const updatePromises = items.map(async (item: any) => {
-        const id = item.id;
-        const newMappings = await getMappingsFunc(
-          id,
-          String(item.idMal),
-          item.format,
-          item.seasonYear
+      await model.deleteMany({});
+      console.log(chalk.red(`Deleted all ${logPrefix} entries`));
+
+      const { media } = await getMappingsFunc(1, 50);
+      if (media && media.length > 0) {
+        const bulkOps = media.map((item: any) => ({
+          insertOne: { document: item },
+        }));
+        await model.bulkWrite(bulkOps);
+        console.log(
+          chalk.green(`Added ${media.length} new ${logPrefix} entries`)
         );
-        await model.updateOne({ id: id }, newMappings ?? {});
-        console.log(chalk.green(`Updated mappings for ${logPrefix} ID: ${id}`));
-      });
-      await Promise.all(updatePromises);
+      } else {
+        console.log(chalk.yellow(`No new ${logPrefix} entries found`));
+      }
     };
 
     await Promise.all([
-      updateMappings(Anime, getMappings, "anime", {
-        status: { $ne: "FINISHED" },
-      }),
-      updateMappings(TrendingMedia, getLTMMappings, "trending anime"),
-      updateMappings(PopularMedia, getLTMMappings, "popular anime"),
+      updateTrendingAndPopular(TrendingMedia, getTrending, "trending anime"),
+      updateTrendingAndPopular(PopularMedia, getPopular, "popular anime"),
     ]);
   } catch (error) {
     console.error(chalk.red("Error running cron job:", error));
