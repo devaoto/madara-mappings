@@ -16,6 +16,7 @@
     "cheerio": "^1.0.0-rc.12",
     "fastest-levenshtein": "^1.0.16",
     "hono": "^4.4.9",
+    "hono-rate-limiter": "^0.4.0",
     "ky": "^1.4.0",
     "mongoose": "^8.4.4",
     "node-cache": "^5.1.2",

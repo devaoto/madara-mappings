@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { getLTMMappings, getMappings } from "./getMappings";
 import connect from "./db/db";
 import Anime from "./db/schema/mappingSchema";
@@ -10,9 +10,58 @@ import { getTrending } from "./providers/trending";
 import { TrendingMedia } from "./db/schema/trendingSchema";
 import { PopularMedia } from "./db/schema/popularSchema";
 import { getPopular } from "./providers/popular";
+import { rateLimiter } from "hono-rate-limiter";
+import { isValidAPIKey } from "./apiKey";
+import type { BlankEnv } from "hono/types";
+import APIKey from "./db/schema/apiKeySchema";
 
 await connect();
+
+console.log(await APIKey.find({}));
+
+const apiKeyMiddleware = async (c: Context<BlankEnv, never, {}>, next: any) => {
+  const apiKey = c.req.query("api_key") ?? c.req.header("x-api-key");
+
+  if (apiKey && (await isValidAPIKey(apiKey, process.env.SECRET_KEY!))) {
+    // @ts-ignore
+    c.set("apiKey", apiKey);
+  } else {
+    // @ts-ignore
+    c.set("apiKey", null);
+  }
+  await next();
+};
+
+const keyGenerator = (c: any) => {
+  const apiKey = c.get("apiKey");
+  return apiKey ? `api-key:${apiKey}` : `ip:${c.req.header("x-forwarded-for")}`;
+};
+
+const limiterWithApiKey = rateLimiter({
+  windowMs: 60 * 1000,
+  limit: 1000,
+  keyGenerator,
+});
+
+const limiterWithoutApiKey = rateLimiter({
+  windowMs: 60 * 1000,
+  limit: 50,
+  keyGenerator,
+});
+
 const app = new Hono();
+
+app.use(apiKeyMiddleware);
+
+app.use((c, next) => {
+  // @ts-ignore
+  const apiKey = c.get("apiKey");
+  if (apiKey) {
+    return limiterWithApiKey(c, next);
+  } else {
+    return limiterWithoutApiKey(c, next);
+  }
+});
 
 app.use(prettyJSON());
 app.use(cors());
