@@ -3,7 +3,7 @@ import { getLTMMappings } from "../getMappings";
 import { PopularMedia } from "../db/schema/popularSchema";
 
 const getAnilistTrending = async (page: number, limit: number) => {
-  const query = `query Query($page: Int, $perPage: Int, $sort: [MediaSort]) {
+  const query = `query Query($page: Int, $perPage: Int, $sort: [MediaSort], $type: MediaType) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
         total
@@ -12,7 +12,7 @@ const getAnilistTrending = async (page: number, limit: number) => {
         hasNextPage
         perPage
       }
-      media(sort: $sort) {
+      media(sort: $sort, type: $type) {
         bannerImage
         averageScore
         coverImage {
@@ -83,6 +83,7 @@ const getAnilistTrending = async (page: number, limit: number) => {
         page,
         perPage: limit,
         sort: ["POPULARITY_DESC", "SCORE_DESC"],
+        type: "ANIME",
       },
     },
   });
