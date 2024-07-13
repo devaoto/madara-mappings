@@ -180,6 +180,13 @@ app.get("/popular", async (c) => {
 cron.schedule("0 */5 * * *", async () => {
   try {
     console.log(chalk.blue("Running cron job to update anime mappings..."));
+    const animes = await Anime.find({ status: { $ne: "FINISHED" } });
+    for (const anime of animes) {
+      const id = anime.id;
+      const newMappings = await getMappings(id);
+      await Anime.updateOne({ id: id }, newMappings ?? {});
+      console.log(chalk.green(`Updated mappings for anime ID: ${id}`));
+    }
 
     const updateTrendingAndPopular = async (
       model: any,
